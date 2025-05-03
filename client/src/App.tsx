@@ -1,11 +1,30 @@
+import { useState } from "react";
 import Navbar from "./features/shared/components/Navbar";
 import { ThemeProvider } from "./features/shared/components/ThemeProvider";
 import { Toaster } from "./features/shared/components/ui/Toaster";
+import { trpc } from "./trpc";
+import { httpBatchLink } from "@trpc/react-query";
+import { env } from "./lib/utils/env";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ExperienceList } from "./features/experiences/components/ExperienceList";
 
 export function App() {
-  return (
-    <ThemeProvider defaultTheme="dark">
+    const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [
+        httpBatchLink({
+          url: env.VITE_SERVER_BASE_URL,
+        }),
+      ],
+    }),
+  );
 
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+         <QueryClientProvider client={queryClient}>
+       
+    <ThemeProvider defaultTheme="dark">
       <Toaster />
       <div className="flex justify-center gap-8 pb-8">
         <Navbar />
@@ -20,24 +39,21 @@ export function App() {
               </b>
             </p>
           </header>
-          <div className="space-y-4 p-4">
-            <img
-              src="/500w-logo.png"
-              alt="logo"
-              className="mx-auto h-24 w-24"
-            />
-            <div className="space-y-2">
-              <h1 className="text-center text-2xl font-semibold">
-                Welcome to the course!
-              </h1>
-              <p className="text-center text-lg text-neutral-500">
-                You're going to build a lot of great things here. Let's get
-                started!
-              </p>
-            </div>
-          </div>
+          <Index />
         </div>
       </div>
-    </ThemeProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
+
+
+function Index() {
+  const experiencesQuery = trpc.experiences.feed.useQuery({});  
+    return (
+        <ExperienceList
+          experiences={experiencesQuery.data?.experiences ?? []}
+          isLoading={experiencesQuery.isLoading}
+        />
+      );  }
