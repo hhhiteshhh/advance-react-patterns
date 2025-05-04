@@ -4,25 +4,28 @@ import { trpc } from '@/router';
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
-  component: Index,
+    component: Index,
+    loader: async ({ context: { trpcQueryUtils } }) => {
+        await trpcQueryUtils.experiences.feed.prefetchInfinite({});
+    },
 })
 
 function Index() {
-    const experiencesQuery = trpc.experiences.feed.useInfiniteQuery(
-        {},
-        {
-          getNextPageParam: (lastPage) => lastPage.nextCursor,
-        },
-      );    return (
-            <InfiniteScroll onLoadMore={experiencesQuery.fetchNextPage}>
-              <ExperienceList
-                experiences={
-                  experiencesQuery.data?.pages.flatMap((page) => page.experiences) ?? []
-                }
-                isLoading={
-                  experiencesQuery.isLoading || experiencesQuery.isFetchingNextPage
-                }
-              />
-            </InfiniteScroll>
-         
-      );  }
+    const [{ pages }, experiencesQuery] =
+        trpc.experiences.feed.useSuspenseInfiniteQuery(
+            {},
+            {
+                getNextPageParam: (lastPage) => lastPage.nextCursor,
+            },
+        );
+    return (
+        <InfiniteScroll onLoadMore={experiencesQuery.fetchNextPage}>
+            <ExperienceList
+                experiences={pages.flatMap((page) => page.experiences)}
+                isLoading={experiencesQuery.isFetchingNextPage}
+
+            />
+        </InfiniteScroll>
+
+    );
+}
