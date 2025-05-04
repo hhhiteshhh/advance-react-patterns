@@ -13,7 +13,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
   return (
     <Card className="overflow-hidden p-0">
       <ExperienceCardMedia experience={experience} />
-            <div className="flex items-start gap-4 p-4">
+      <div className="flex items-start gap-4 p-4">
         <ExperienceCardAvatar experience={experience} />
         <div className="w-full space-y-4">
           <ExperienceCardHeader experience={experience} />
@@ -21,7 +21,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
           <ExperienceCardMeta experience={experience} />
           <ExperienceCardMetricButtons experience={experience} />
         </div>
-       </div>
+      </div>
 
     </Card>
   );
@@ -31,7 +31,10 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
 type ExperienceCardAvatarProps = Pick<ExperienceCardProps, "experience">;
 
 function ExperienceCardAvatar({ experience }: ExperienceCardAvatarProps) {
-  return <UserAvatar user={experience.user} showName={false} />;
+  return <Link to="/users/$userId" params={{ userId: experience.user.id }}>
+    <UserAvatar user={experience.user} showName={false} />
+  </Link>
+
 }
 
 type ExperienceCardMediaProps = Pick<ExperienceCardProps, "experience">;
@@ -57,8 +60,15 @@ type ExperienceCardHeaderProps = Pick<ExperienceCardProps, "experience">;
 function ExperienceCardHeader({ experience }: ExperienceCardHeaderProps) {
   return (
     <div>
-      <div>{experience.user.name}</div>
-            <Link
+      <Link
+        to="/users/$userId"
+        params={{ userId: experience.user.id }}
+        variant="ghost"
+      >
+        <div>{experience.user.name}</div>
+      </Link>
+
+      <Link
         to="/experiences/$experienceId"
         params={{ experienceId: experience.id }}
       >
