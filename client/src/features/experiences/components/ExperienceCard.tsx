@@ -1,9 +1,8 @@
 import { LinkIcon, MessageSquare } from "lucide-react";
-
 import Card from "@/features/shared/components/ui/Card";
-
+import { Button } from "@/features/shared/components/ui/Button";
+import Link from "@/features/shared/components/ui/Link";
 import { ExperienceForList } from "../types";
-import { CommentsSection } from "@/features/comments/components/CommentsSection";
 
 type ExperienceCardProps = {
   experience: ExperienceForList;
@@ -18,9 +17,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
         <ExperienceCardContent experience={experience} />
         <ExperienceCardMeta experience={experience} />
         <ExperienceCardMetricButtons experience={experience} />
-        <CommentsSection experienceId={experience.id}
-        commentsCount={experience.commentsCount}
-        />
+       
       </div>
     </Card>
   );
@@ -50,9 +47,13 @@ function ExperienceCardHeader({ experience }: ExperienceCardHeaderProps) {
   return (
     <div>
       <div>{experience.user.name}</div>
-      <h2 className="text-secondary-500 dark:text-primary-500 text-xl font-bold">
-        {experience.title}
-      </h2>
+            <Link
+        to="/experiences/$experienceId"
+        params={{ experienceId: experience.id }}
+      >
+        <h2 className="text-xl font-bold">{experience.title}</h2>
+      </Link>
+
     </div>
   );
 }
@@ -95,8 +96,16 @@ function ExperienceCardMetricButtons({
 }: ExperienceCardMetricButtonsProps) {
   return (
     <div className="flex items-center gap-2">
-      <MessageSquare className="h-5 w-5" />
-      <span>{experience.commentsCount}</span>
+      <Button variant="link" asChild>
+        <Link
+          to="/experiences/$experienceId"
+          params={{ experienceId: experience.id }}
+          variant="ghost"
+        >
+          <MessageSquare className="h-5 w-5" />
+          <span>{experience.commentsCount}</span>
+        </Link>
+      </Button>
     </div>
   );
 }
