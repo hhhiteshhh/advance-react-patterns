@@ -1,5 +1,12 @@
 import type { AppRouter } from "@advanced-react/server";
-import { createTRPCQueryUtils, createTRPCReact, httpBatchLink, TRPCClientError } from "@trpc/react-query";
+import {
+  createTRPCQueryUtils,
+  createTRPCReact,
+  getQueryKey,
+  httpBatchLink,
+  TRPCClientError,
+  TRPCLink,
+} from "@trpc/react-query";
 import { env } from "./lib/utils/env";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
@@ -7,15 +14,63 @@ import { routeTree } from "./routeTree.gen";
 import Spinner from "@/features/shared/components/ui/Spinner";
 import { ErrorComponent } from "@/features/shared/components/ErrorComponent";
 import { NotFoundComponent } from "./features/shared/components/NotFoundComponent";
+import { observable } from "@trpc/server/observable";
 
 export const queryClient = new QueryClient()
 
 export const trpc = createTRPCReact<AppRouter>();
+
+const customLink: TRPCLink<AppRouter> = () => {
+  return ({ next, op }) => {
+    return observable((observer) => {
+      const unsubscribe = next(op).subscribe({
+        next(value) {
+          observer.next(value);
+        },
+
+        error(err) {
+          if (err?.data?.code === "UNAUTHORIZED") {
+            router.navigate({ to: "/login" });
+          }
+
+          observer.error(err);
+        },
+
+        complete() {
+          observer.complete();
+        },
+      });
+
+      return unsubscribe;
+    });
+  };
+};
+
+function getHeaders() {
+  const queryKey = getQueryKey(trpc.auth.currentUser);
+  const token = queryClient.getQueryData<{ accessToken: string }>(
+    queryKey,
+  )?.accessToken;
+
+  return {
+    Authorization: token ? `Bearer ${token}` : undefined,
+  };
+}
+
 export const trpcClient =
   trpc.createClient({
-    links: [
+    links: [customLink,
       httpBatchLink({
         url: env.VITE_SERVER_BASE_URL,
+
+        fetch(url, options) {
+          return fetch(url, {
+            ...options,
+            credentials: "include",
+          });
+        },
+        headers: getHeaders(),
+
       }),
     ],
   })
