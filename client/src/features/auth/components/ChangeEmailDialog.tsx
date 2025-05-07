@@ -63,9 +63,10 @@ export function ChangeEmailDialog() {
     },
   });
 
-  function onSubmit(data: ChangeEmailFormData) {
+    const handleSubmit = form.handleSubmit((data) => {
     changeEmailMutation.mutate(data);
-  }
+      });
+
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -77,7 +78,7 @@ export function ChangeEmailDialog() {
           <DialogTitle>Change Email</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
