@@ -6,6 +6,8 @@ import Card from "@/features/shared/components/ui/Card";
 import Link from "@/features/shared/components/ui/Link";
 
 import { ExperienceForDetails } from "../types";
+import { router } from "@/router";
+import { ExperienceDeleteDialog } from "./ExperienceDeleteDialog";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -124,6 +126,12 @@ function ExperienceOwnerButtons({ experience }: ExperienceOwnerButtonsProps) {
           Edit
         </Link>
       </Button>
+      <ExperienceDeleteDialog
+        experience={experience}
+        onSuccess={() => {
+          router.navigate({ to: "/" });
+        }}
+      />
     </div>
   );
 }
