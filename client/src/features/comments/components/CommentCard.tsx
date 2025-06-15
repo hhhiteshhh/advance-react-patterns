@@ -82,21 +82,72 @@ function CommentCardButtons({
   }
 
   const deleteMutation = trpc.comments.delete.useMutation({
-    onSuccess: async () => {
+    onMutate: async ({ id }) => {
+      setIsDeleteDialogOpen(false);
+
       await Promise.all([
-        utils.comments.byExperienceId.invalidate({
+        utils.comments.byExperienceId.cancel({
           experienceId: comment.experienceId,
         }),
-        utils.experiences.feed.invalidate(),
+        utils.experiences.byId.cancel({
+          id: comment.experienceId,
+        }),
       ]);
 
-      setIsEditing(false);
+      const previousData = {
+        byExperienceId: utils.comments.byExperienceId.getData({
+          experienceId: comment.experienceId,
+        }),
+        experienceById: utils.experiences.byId.getData({
+          id: comment.experienceId,
+        }),
+      };
 
-      toast({
-        title: "Comment deleted successfully",
+      utils.comments.byExperienceId.setData(
+        { experienceId: comment.experienceId },
+        (oldData) => {
+          if (!oldData) {
+            return;
+          }
+
+          return oldData.filter((c) => c.id !== id);
+        },
+      );
+
+      utils.experiences.byId.setData(
+        { id: comment.experienceId },
+        (oldData) => {
+          if (!oldData) {
+            return;
+          }
+
+          return {
+            ...oldData,
+            commentsCount: Math.max(0, oldData.commentsCount - 1),
+          };
+        },
+      );
+
+      const { dismiss } = toast({
+        title: "Comment deleted",
+        description: "Your comment has been deleted",
       });
+
+      return { dismiss, previousData };
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      context?.dismiss?.();
+
+      utils.comments.byExperienceId.setData(
+        { experienceId: comment.experienceId },
+        context?.previousData.byExperienceId,
+      );
+
+      utils.experiences.byId.setData(
+        { id: comment.experienceId },
+        context?.previousData.experienceById,
+      );
+
       toast({
         title: "Failed to delete comment",
         description: error.message,
