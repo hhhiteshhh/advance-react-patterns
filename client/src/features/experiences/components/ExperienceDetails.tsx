@@ -5,7 +5,7 @@ import { Button } from "@/features/shared/components/ui/Button";
 import Card from "@/features/shared/components/ui/Card";
 import Link from "@/features/shared/components/ui/Link";
 import { UserAvatarList } from "@/features/users/components/UserAvatarList";
-
+import { ExperienceFavoriteButton } from "./ExperienceFavoriteButton";
 import { ExperienceForDetails } from "../types";
 import { router } from "@/router";
 import { ExperienceDeleteDialog } from "./ExperienceDeleteDialog";
@@ -115,10 +115,17 @@ function ExperienceDetailsActionButtons({
   }
   if (currentUser) {
     return (
-      <ExperienceAttendButton
-        experienceId={experience.id}
-        isAttending={experience.isAttending}
-      />
+      <div className="flex items-center gap-4">
+        <ExperienceAttendButton
+          experienceId={experience.id}
+          isAttending={experience.isAttending}
+        />
+        <ExperienceFavoriteButton
+          experienceId={experience.id}
+          isFavorited={experience.isFavorited}
+          favoritesCount={experience.favoritesCount}
+        />
+      </div>
     );
   }
 
