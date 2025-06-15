@@ -10,10 +10,11 @@ import { UserAvatar } from "@/features/users/components/UserAvatar";
 import { UserForDetails } from "@/features/users/types";
 import { isTRPCClientError, trpc } from "@/router";
 import { UserEditDialog } from "@/features/users/components/UserEditDialog";
+import Link from "@/features/shared/components/ui/Link";
 
 export const Route = createFileRoute("/users/$userId/")({
   params: {
-    parse: (params) => ({  
+    parse: (params) => ({
       userId: z.coerce.number().parse(params.userId),
     }),
   },
@@ -57,8 +58,8 @@ function UserPage() {
         {user.bio && (
           <p className="text-neutral-600 dark:text-neutral-400">{user.bio}</p>
         )}
-                <UserProfileButton user={user} />
-
+        <UserProfileStats user={user} />
+        <UserProfileButton user={user} />
       </Card>
 
       <UserProfileHostStats user={user} />
@@ -80,20 +81,66 @@ function UserPage() {
 }
 
 type UserProfileButtonProps = {
-    user: UserForDetails;
-  };
-  
-  function UserProfileButton({ user }: UserProfileButtonProps) {
-    const { currentUser } = useCurrentUser();
-    const isCurrentUser = currentUser?.id === user.id;
-  
-    if (isCurrentUser) {
-      return <UserEditDialog user={user} />;
-    }
-  
-    return null;
+  user: UserForDetails;
+};
+
+function UserProfileButton({ user }: UserProfileButtonProps) {
+  const { currentUser } = useCurrentUser();
+  const isCurrentUser = currentUser?.id === user.id;
+
+  if (isCurrentUser) {
+    return <UserEditDialog user={user} />;
   }
-  
+
+  return null;
+}
+
+type UserProfileStatsProps = {
+  user: UserForDetails;
+};
+
+function UserProfileStats({ user }: UserProfileStatsProps) {
+  const stats = [
+    {
+      label: "Followers",
+      value: user.followersCount,
+      to: `/users/$userId/followers`,
+      params: {
+        userId: user.id,
+      },
+    },
+    {
+      label: "Following",
+      value: user.followingCount,
+      to: `/users/$userId/following`,
+      params: {
+        userId: user.id,
+      },
+    },
+  ] as const;
+
+  return (
+    <div className="flex w-full justify-center gap-12 border-y-2 border-neutral-200 py-4 dark:border-neutral-800">
+      {stats.map((stat) => (
+        <Link
+          key={stat.label}
+          to={stat.to}
+          params={stat.params}
+          variant="ghost"
+          className="text-center"
+        >
+          <div className="dark:text-primary-500 text-secondary-500 text-center text-2xl font-bold">
+            {stat.value}
+          </div>
+          <div className="text-sm text-neutral-600 dark:text-neutral-400">
+            {stat.label}
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 type UserProfileHostStatsProps = {
   user: UserForDetails;
 };
