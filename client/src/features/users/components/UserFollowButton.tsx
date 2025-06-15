@@ -169,7 +169,7 @@ export function UserFollowButton({
       });
     },
   });
-  const unfollowMutation = trpc.users.follow.useMutation({
+  const unfollowMutation = trpc.users.unfollow.useMutation({
     onMutate: async ({ id }) => {
       function updateUser<
         T extends { isFollowing: boolean; followersCount: number },
@@ -177,7 +177,7 @@ export function UserFollowButton({
         return {
           ...oldData,
           isFollowing: false,
-          followersCount: oldData.followersCount - 1,
+          followersCount: Math.max(oldData.followersCount - 1, 0),
         };
       }
 
