@@ -16,7 +16,7 @@ export function ExperienceAttendButton({
 }: ExperienceAttendButtonProps) {
   const { currentUser } = useCurrentUser();
 
-  const { attendMutation } = useExperienceMutations();
+  const { attendMutation, unattendMutation } = useExperienceMutations();
 
   if (!currentUser) {
     return null;
@@ -28,6 +28,7 @@ export function ExperienceAttendButton({
       onClick={() => {
         if (isAttending) {
           // TODO: Implement unattend
+          unattendMutation.mutate({ id: experienceId });
         } else {
           attendMutation.mutate({ id: experienceId });
         }
