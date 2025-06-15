@@ -5,7 +5,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Search } from "lucide-react";
 import { useForm } from "react-hook-form";
-
+import { DateTimePicker } from "@/features/shared/components/ui/DateTimePicker";
 import { Button } from "@/features/shared/components/ui/Button";
 import Card from "@/features/shared/components/ui/Card";
 import {
@@ -44,6 +44,9 @@ export function ExperienceFilters({
     if (values.tags) {
       filters.tags = values.tags;
     }
+    if (values.scheduledAt) {
+      filters.scheduledAt = values.scheduledAt;
+    }
 
     onFiltersChange(filters);
   });
@@ -52,23 +55,38 @@ export function ExperienceFilters({
     <Form {...form}>
       <Card>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <FormField
-            control={form.control}
-            name="q"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="search"
-                    value={field.value ?? ""}
-                    placeholder="Search experiences..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-row gap-4">
+            <FormField
+              control={form.control}
+              name="q"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="search"
+                      value={field.value ?? ""}
+                      placeholder="Search experiences..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="scheduledAt"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <DateTimePicker {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
