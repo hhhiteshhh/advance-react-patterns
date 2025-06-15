@@ -1,7 +1,10 @@
-import { Experience, User } from "@advanced-react/server/database/schema";
+import { Experience, User, Tag } from "@advanced-react/server/database/schema";
 
 type ExperienceWithUser = Experience & {
   user: User;
+};
+type ExperienceWithTags = Experience & {
+  tags: Tag[];
 };
 
 type ExperienceWithCommentsCount = Experience & {
@@ -29,11 +32,13 @@ export type ExperienceForList = ExperienceWithUser &
   ExperienceWithCommentsCount &
   ExperienceWithCommentsCount &
   ExperienceWithAttendeesCount &
-  ExperienceWithFavoritesCount;
+  ExperienceWithFavoritesCount &
+  ExperienceWithTags;
 
 export type ExperienceForDetails = ExperienceWithUser &
   ExperienceWithUserContext &
   ExperienceWithCommentsCount &
   ExperienceWithAttendees &
   ExperienceWithAttendeesCount &
-  ExperienceWithFavoritesCount;
+  ExperienceWithFavoritesCount &
+  ExperienceWithTags;

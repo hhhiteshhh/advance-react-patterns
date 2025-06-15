@@ -10,6 +10,7 @@ import { ExperienceForDetails } from "../types";
 import { router } from "@/router";
 import { ExperienceDeleteDialog } from "./ExperienceDeleteDialog";
 import { ExperienceAttendButton } from "./ExperienceAttendButton";
+import TagList from "@/features/tags/components/TagList";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -22,6 +23,8 @@ export function ExperienceDetails({ experience }: ExperienceDetailsProps) {
       <div className="space-y-4 p-4">
         <ExperienceDetailsHeader experience={experience} />
         <ExperienceDetailsContent experience={experience} />
+        <ExperienceDetailsTags experience={experience} />
+
         <ExperienceDetailsMeta experience={experience} />
         <ExperienceDetailsActionButtons experience={experience} />
         <div className="border-t-2 border-neutral-200 pt-4 dark:border-neutral-800">
@@ -30,6 +33,12 @@ export function ExperienceDetails({ experience }: ExperienceDetailsProps) {
       </div>
     </Card>
   );
+}
+
+type ExperienceDetailsTagsProps = Pick<ExperienceDetailsProps, "experience">;
+
+function ExperienceDetailsTags({ experience }: ExperienceDetailsTagsProps) {
+  return <TagList tags={experience.tags} />;
 }
 
 type ExperienceDetailsMediaProps = Pick<ExperienceDetailsProps, "experience">;
