@@ -4,6 +4,7 @@ import { Button } from "@/features/shared/components/ui/Button";
 import Link from "@/features/shared/components/ui/Link";
 import { ExperienceForList } from "../types";
 import { UserAvatar } from "@/features/users/components/UserAvatar";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 type ExperienceCardProps = {
   experience: ExperienceForList;
@@ -20,21 +21,21 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
           <ExperienceCardContent experience={experience} />
           <ExperienceCardMeta experience={experience} />
           <ExperienceCardMetricButtons experience={experience} />
+          <ExperienceCardActionButtons experience={experience} />
         </div>
       </div>
-
     </Card>
   );
 }
 
-
 type ExperienceCardAvatarProps = Pick<ExperienceCardProps, "experience">;
 
 function ExperienceCardAvatar({ experience }: ExperienceCardAvatarProps) {
-  return <Link to="/users/$userId" params={{ userId: experience.user.id }}>
-    <UserAvatar user={experience.user} showName={false} />
-  </Link>
-
+  return (
+    <Link to="/users/$userId" params={{ userId: experience.user.id }}>
+      <UserAvatar user={experience.user} showName={false} />
+    </Link>
+  );
 }
 
 type ExperienceCardMediaProps = Pick<ExperienceCardProps, "experience">;
@@ -74,7 +75,6 @@ function ExperienceCardHeader({ experience }: ExperienceCardHeaderProps) {
       >
         <h2 className="text-xl font-bold">{experience.title}</h2>
       </Link>
-
     </div>
   );
 }
@@ -125,6 +125,41 @@ function ExperienceCardMetricButtons({
         >
           <MessageSquare className="h-5 w-5" />
           <span>{experience.commentsCount}</span>
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+type ExperienceCardActionButtonsProps = Pick<ExperienceCardProps, "experience">;
+
+function ExperienceCardActionButtons({
+  experience,
+}: ExperienceCardActionButtonsProps) {
+  const { currentUser } = useCurrentUser();
+
+  const isPostOwner = currentUser?.id === experience.userId;
+
+  if (isPostOwner) {
+    return <ExperienceCardOwnerButtons experience={experience} />;
+  }
+
+  return null;
+}
+
+type ExperienceCardOwnerButtonsProps = Pick<ExperienceCardProps, "experience">;
+
+function ExperienceCardOwnerButtons({
+  experience,
+}: ExperienceCardOwnerButtonsProps) {
+  return (
+    <div className="flex gap-4">
+      <Button asChild variant="link">
+        <Link
+          to="/experiences/$experienceId/edit"
+          params={{ experienceId: experience.id }}
+        >
+          Edit
         </Link>
       </Button>
     </div>
