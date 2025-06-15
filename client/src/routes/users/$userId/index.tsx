@@ -11,6 +11,7 @@ import { UserForDetails } from "@/features/users/types";
 import { isTRPCClientError, trpc } from "@/router";
 import { UserEditDialog } from "@/features/users/components/UserEditDialog";
 import Link from "@/features/shared/components/ui/Link";
+import { UserFollowButton } from "@/features/users/components/UserFollowButton";
 
 export const Route = createFileRoute("/users/$userId/")({
   params: {
@@ -88,11 +89,11 @@ function UserProfileButton({ user }: UserProfileButtonProps) {
   const { currentUser } = useCurrentUser();
   const isCurrentUser = currentUser?.id === user.id;
 
-  if (isCurrentUser) {
-    return <UserEditDialog user={user} />;
-  }
-
-  return null;
+  return isCurrentUser ? (
+    <UserEditDialog user={user} />
+  ) : (
+    <UserFollowButton targetUserId={user.id} isFollowing={user.isFollowing} />
+  );
 }
 
 type UserProfileStatsProps = {
