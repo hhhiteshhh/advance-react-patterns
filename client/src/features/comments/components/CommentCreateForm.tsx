@@ -3,6 +3,7 @@ import { commentValidationSchema } from "@advanced-react/shared/schema/comment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 import { Button } from "@/features/shared/components/ui/Button";
 import {
@@ -25,6 +26,7 @@ type CommentCreateFormProps = {
 export function CommentCreateForm({ experienceId }: CommentCreateFormProps) {
   const { toast } = useToast();
   const utils = trpc.useUtils();
+  const { currentUser } = useCurrentUser();
 
   const form = useForm<CommentCreateFormData>({
     resolver: zodResolver(commentValidationSchema),
@@ -63,6 +65,14 @@ export function CommentCreateForm({ experienceId }: CommentCreateFormProps) {
       experienceId,
     });
   });
+
+  if (!currentUser) {
+    return (
+      <div className="text-center text-neutral-500">
+        Please log in to add comments
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>

@@ -12,11 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/features/shared/components/ui/Dialog"
+} from "@/features/shared/components/ui/Dialog";
 import { trpc } from "@/router";
 import { useToast } from "@/features/shared/hooks/useToast";
 import Link from "@/features/shared/components/ui/Link";
-
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 
 type CommentCardProps = {
   comment: CommentForList;
@@ -28,12 +28,12 @@ export function CommentCard({ comment }: CommentCardProps) {
   if (isEditing) {
     return <CommentEditForm comment={comment} setIsEditing={setIsEditing} />;
   }
+
   return (
     <Card className="space-y-4">
       <CommentCardHeader comment={comment} />
       <CommentCardContent comment={comment} />
       <CommentCardButtons setIsEditing={setIsEditing} comment={comment} />
-
     </Card>
   );
 }
@@ -48,7 +48,6 @@ function CommentCardHeader({ comment }: CommentCardHeaderProps) {
         <UserAvatar user={comment.user} />
       </Link>
 
-
       <time className="text-sm text-neutral-500">
         · {new Date(comment.createdAt).toLocaleDateString()}
       </time>
@@ -62,16 +61,25 @@ function CommentCardContent({ comment }: CommentCardContentProps) {
   return <p>{comment.content}</p>;
 }
 
-
 type CommentCardButtonsProps = Pick<CommentCardProps, "comment"> & {
   setIsEditing: (value: boolean) => void;
 };
 
-function CommentCardButtons({ comment, setIsEditing }: CommentCardButtonsProps) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+function CommentCardButtons({
+  comment,
+  setIsEditing,
+}: CommentCardButtonsProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const utils = trpc.useUtils();
   const { toast } = useToast();
+  const { currentUser } = useCurrentUser();
 
+  const isCommentOwner = currentUser?.id === comment.userId;
+  const isExperienceOwner = currentUser?.id === comment.experience.userId;
+
+  if (!isCommentOwner && !isExperienceOwner) {
+    return null;
+  }
 
   const deleteMutation = trpc.comments.delete.useMutation({
     onSuccess: async () => {
@@ -98,28 +106,44 @@ function CommentCardButtons({ comment, setIsEditing }: CommentCardButtonsProps) 
   });
   return (
     <div className="flex gap-4">
-      <Button variant="link" onClick={() => setIsEditing(true)}>
-        Edit
-      </Button>
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogTrigger>
-          <Button variant={"destructive-link"} >Delete</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Comment</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this comment? This action is irreversible
+      {isCommentOwner && (
+        <Button variant="link" onClick={() => setIsEditing(true)}>
+          Edit
+        </Button>
+      )}
+      {(isCommentOwner || isExperienceOwner) && (
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="destructive-link">Delete</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Comment</DialogTitle>
+            </DialogHeader>
+            <DialogDescription className="text-neutral-600 dark:text-neutral-400">
+              Are you sure you want to delete this comment? This action cannot
+              be undone.
             </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant={"outline"} onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant={"destructive"} disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate({ id: comment.id })}>{deleteMutation.isPending ? "Deleting..." : "Delete"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  deleteMutation.mutate({ id: comment.id });
+                }}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
