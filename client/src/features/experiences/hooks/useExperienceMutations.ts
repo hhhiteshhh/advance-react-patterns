@@ -193,7 +193,7 @@ export function useExperienceMutations(
       });
     },
   });
-  const unattendMutation = trpc.experiences.attend.useMutation({
+  const unattendMutation = trpc.experiences.unattend.useMutation({
     onMutate: async ({ id }) => {
       function updateExperience<
         T extends {
