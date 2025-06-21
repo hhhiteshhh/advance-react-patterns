@@ -28,7 +28,7 @@ export function ExperienceDetails({ experience }: ExperienceDetailsProps) {
         <ExperienceDetailsTags experience={experience} />
         <ExperienceDetailsMeta experience={experience} />
         <ExperienceDetailsActionButtons experience={experience} />
-        <div className="border-t-2 border-neutral-200 pt-4 dark:border-neutral-800">
+        <div className="border-y-2 border-neutral-200 py-4 dark:border-neutral-800">
           <ExperienceDetailsAttendees experience={experience} />
         </div>
         <ExperienceDetailsLocation experience={experience} />
