@@ -11,6 +11,8 @@ import { router } from "@/router";
 import { ExperienceDeleteDialog } from "./ExperienceDeleteDialog";
 import { ExperienceAttendButton } from "./ExperienceAttendButton";
 import TagList from "@/features/tags/components/TagList";
+import { LocationData } from "@advanced-react/shared/schema/experience";
+import LocationDisplay from "@/features/shared/components/LocationDisplay";
 
 type ExperienceDetailsProps = {
   experience: ExperienceForDetails;
@@ -24,15 +26,34 @@ export function ExperienceDetails({ experience }: ExperienceDetailsProps) {
         <ExperienceDetailsHeader experience={experience} />
         <ExperienceDetailsContent experience={experience} />
         <ExperienceDetailsTags experience={experience} />
-
         <ExperienceDetailsMeta experience={experience} />
         <ExperienceDetailsActionButtons experience={experience} />
         <div className="border-t-2 border-neutral-200 pt-4 dark:border-neutral-800">
           <ExperienceDetailsAttendees experience={experience} />
         </div>
+        <ExperienceDetailsLocation experience={experience} />
       </div>
     </Card>
   );
+}
+
+type ExperienceDetailsLocationProps = Pick<
+  ExperienceDetailsProps,
+  "experience"
+>;
+
+function ExperienceDetailsLocation({
+  experience,
+}: ExperienceDetailsLocationProps) {
+  const location = experience.location
+    ? (JSON.parse(experience.location) as LocationData)
+    : null;
+
+  if (!location) {
+    return null;
+  }
+
+  return <LocationDisplay location={location} />;
 }
 
 type ExperienceDetailsTagsProps = Pick<ExperienceDetailsProps, "experience">;
