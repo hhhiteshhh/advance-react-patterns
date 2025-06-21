@@ -6,6 +6,7 @@ import { z } from "zod";
 import FileInput from "@/features/shared/components/ui/FileInput";
 import { LocationPicker } from "@/features/shared/components/LocationPicker";
 import { Button } from "@/features/shared/components/ui/Button";
+import { DateTimePicker } from "@/features/shared/components/ui/DateTimePicker";
 import {
   Form,
   FormControl,
@@ -22,9 +23,9 @@ import { useExperienceMutations } from "../hooks/useExperienceMutations";
 type ExperienceFormData = z.infer<typeof experienceValidationSchema>;
 
 type ExperienceFormProps = {
-  experience: Experience;
+  experience?: Experience;
   onSuccess?: (id: Experience["id"]) => void;
-  onCancel?: (id: Experience["id"]) => void;
+  onCancel?: (id?: Experience["id"]) => void;
 };
 
 export function ExperienceForm({
@@ -35,22 +36,27 @@ export function ExperienceForm({
   const form = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceValidationSchema),
     defaultValues: {
-      id: experience.id,
-      title: experience.title,
-      content: experience.content,
-      url: experience.url,
-      scheduledAt: experience.scheduledAt,
-      location: experience.location
+      id: experience?.id ?? undefined,
+      title: experience?.title ?? "",
+      content: experience?.content ?? "",
+      url: experience?.url ?? null,
+      scheduledAt: experience?.scheduledAt ?? "",
+      location: experience?.location
         ? JSON.parse(experience.location)
         : undefined,
     },
   });
 
-  const { editMutation } = useExperienceMutations({
+  const { addMutation, editMutation } = useExperienceMutations({
+    add: {
+      onSuccess,
+    },
     edit: {
       onSuccess,
     },
   });
+
+  const mutation = experience ? editMutation : addMutation;
 
   const handleSubmit = form.handleSubmit((data) => {
     const formData = new FormData();
@@ -64,8 +70,7 @@ export function ExperienceForm({
         }
       }
     }
-
-    editMutation.mutate(formData);
+    mutation.mutate(formData);
   });
 
   return (
@@ -114,6 +119,20 @@ export function ExperienceForm({
         />
         <FormField
           control={form.control}
+          name="scheduledAt"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Date</FormLabel>
+              <FormControl>
+                <DateTimePicker {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="image"
           render={({ field }) => (
             <FormItem>
@@ -145,13 +164,14 @@ export function ExperienceForm({
         />
 
         <div className="flex gap-2">
-          <Button type="submit" disabled={editMutation.isPending}>
-            {editMutation.isPending ? "Saving..." : "Save"}
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? "Saving..." : "Save"}
           </Button>
+
           <Button
             type="button"
             variant="outline"
-            onClick={() => onCancel?.(experience.id)}
+            onClick={() => onCancel?.(experience?.id)}
           >
             Cancel
           </Button>

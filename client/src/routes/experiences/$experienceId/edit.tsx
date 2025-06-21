@@ -1,4 +1,3 @@
-import { Experience } from "@advanced-react/server/database/schema";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -44,10 +43,10 @@ function ExperienceEditPage() {
     id: experienceId,
   });
 
-  function navigateToExperience(id: Experience["id"]) {
+  function navigateToExperience() {
     router.navigate({
       to: "/experiences/$experienceId",
-      params: { experienceId: id },
+      params: { experienceId },
     });
   }
 
