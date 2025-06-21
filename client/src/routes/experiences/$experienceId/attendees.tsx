@@ -1,9 +1,10 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { z } from "zod";
-
 import { InfiniteScroll } from "@/features/shared/components/InfiniteScroll";
 import { UserList } from "@/features/users/components/UserList";
 import { isTRPCClientError, trpc } from "@/router";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import { ExperienceKickButton } from "@/features/experiences/components/ExperienceKickButton";
 import { UserFollowButton } from "@/features/users/components/UserFollowButton";
 
 export const Route = createFileRoute("/experiences/$experienceId/attendees")({
@@ -34,12 +35,13 @@ export const Route = createFileRoute("/experiences/$experienceId/attendees")({
 });
 
 function ExperienceAttendeesPage() {
+  const { currentUser } = useCurrentUser();
   const { experienceId } = Route.useParams();
 
   const [experience] = trpc.experiences.byId.useSuspenseQuery({
     id: experienceId,
   });
-
+  const isOwner = currentUser?.id === experience.userId;
   const [{ pages }, attendeesQuery] =
     trpc.users.experienceAttendees.useSuspenseInfiniteQuery(
       { experienceId },
@@ -60,10 +62,18 @@ function ExperienceAttendeesPage() {
             users={pages.flatMap((page) => page.attendees)}
             isLoading={attendeesQuery.isFetchingNextPage}
             rightComponent={(user) => (
-              <UserFollowButton
-                targetUserId={user.id}
-                isFollowing={user.isFollowing}
-              />
+              <div className="flex items-center gap-4">
+                <UserFollowButton
+                  targetUserId={user.id}
+                  isFollowing={user.isFollowing}
+                />
+                {isOwner && (
+                  <ExperienceKickButton
+                    experienceId={experience.id}
+                    userId={user.id}
+                  />
+                )}
+              </div>
             )}
           />
         </InfiniteScroll>
